@@ -9,35 +9,27 @@ import io.openmessaging.MessageHeader;
 import io.openmessaging.Producer;
 import io.openmessaging.Promise;
 
-public class DefaultProducer  implements Producer {
-    private MessageFactory messageFactory = new DefaultMessageFactory();
+public class DefaultProducer  implements Producer,MessageFactory {
+
     private MessageStore messageStore = MessageStore.getInstance();
 
-    private KeyValue properties;
-
+    private KeyValue properties; //这里包含文件存放路径
+    private String FILEPATH = null;
     public DefaultProducer(KeyValue properties) {
         this.properties = properties;
+        FILEPATH = properties.getString("STORE_PATH");
+        MessageStore.setPath(FILEPATH);
     }
-
 
     @Override public BytesMessage createBytesMessageToTopic(String topic, byte[] body) {
-        return messageFactory.createBytesMessageToTopic(topic, body);
+        ISMessage defaultBytesMessage = new ISMessage(body);
+        defaultBytesMessage.putHeaders(MessageHeader.TOPIC, topic);
+        return defaultBytesMessage;
     }
-
     @Override public BytesMessage createBytesMessageToQueue(String queue, byte[] body) {
-        return messageFactory.createBytesMessageToQueue(queue, body);
-    }
-
-    @Override public void start() {
-
-    }
-
-    @Override public void shutdown() {
-
-    }
-
-    @Override public KeyValue properties() {
-        return properties;
+        ISMessage defaultBytesMessage = new ISMessage(body);
+        defaultBytesMessage.putHeaders(MessageHeader.QUEUE, queue);
+        return defaultBytesMessage;
     }
 
     @Override public void send(Message message) {
@@ -47,9 +39,15 @@ public class DefaultProducer  implements Producer {
         if ((topic == null && queue == null) || (topic != null && queue != null)) {
             throw new ClientOMSException(String.format("Queue:%s Topic:%s should put one and only one", true, queue));
         }
-
+        //TODO 重写存储逻辑，高效存储
         messageStore.putMessage(topic != null ? topic : queue, message);
+        if(topic == null)
+            messageStore.putQueueMessage(queue, message);
+        else
+            messageStore.putTopicMessage(topic, message);
     }
+
+
 
     @Override public void send(Message message, KeyValue properties) {
         throw new UnsupportedOperationException("Unsupported");
@@ -78,4 +76,18 @@ public class DefaultProducer  implements Producer {
     @Override public BatchToPartition createBatchToPartition(String partitionName, KeyValue properties) {
         throw new UnsupportedOperationException("Unsupported");
     }
+
+    @Override public void start() {
+
+    }
+
+    @Override public void shutdown() {
+
+    }
+
+    @Override public KeyValue properties() {
+        return properties;
+    }
+
+
 }

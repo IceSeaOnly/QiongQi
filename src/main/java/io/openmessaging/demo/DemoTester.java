@@ -9,11 +9,13 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import org.junit.Assert;
+import org.junit.Test;
 
 public class DemoTester {
 
 
-    public static void main(String[] args) {
+    @Test
+    public void main() {
         KeyValue properties = new DefaultKeyValue();
         /*
         //实际测试时利用 STORE_PATH 传入存储路径
@@ -34,7 +36,7 @@ public class DemoTester {
         List<Message> messagesForTopic2 = new ArrayList<>(1024);
         List<Message> messagesForQueue1 = new ArrayList<>(1024);
         List<Message> messagesForQueue2 = new ArrayList<>(1024);
-        for (int i = 0; i < 1024; i++) {
+        for (int i = 0; i < 102400; i++) {
             //注意实际比赛可能还会向消息的headers或者properties里面填充其它内容
             messagesForTopic1.add(producer.createBytesMessageToTopic(topic1,  (topic1 + i).getBytes()));
             messagesForTopic2.add(producer.createBytesMessageToTopic(topic2,  (topic2 + i).getBytes()));

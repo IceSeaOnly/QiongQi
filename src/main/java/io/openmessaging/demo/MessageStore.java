@@ -1,6 +1,9 @@
 package io.openmessaging.demo;
 
 import io.openmessaging.Message;
+import org.junit.Test;
+
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -8,6 +11,12 @@ import java.util.Map;
 public class MessageStore {
 
     private static final MessageStore INSTANCE = new MessageStore();
+    private static String path; //本地存储位置
+
+    public static void setPath(String spath) {
+        if(path == null)
+            MessageStore.path = spath;
+    }
 
     public static MessageStore getInstance() {
         return INSTANCE;
@@ -43,4 +52,33 @@ public class MessageStore {
         offsetMap.put(bucket, ++offset);
         return message;
    }
+
+   /**
+    * 自定义存储逻辑
+    * */
+    public void putQueueMessage(String queue, Message message) {
+
+    }
+
+    /**
+     * 自定义存储逻辑
+     * */
+    public void putTopicMessage(String topic, Message message) {
+
+    }
+
+    public String Serialization(Message m){
+        ISMessage msg = (ISMessage) m;
+        StringBuilder sb = new StringBuilder();
+        sb.append("body ").append(new String(msg.getBody()));
+        return sb.toString();
+    }
+
+    @Test
+    public void test(){
+        Message m = new ISMessage("helfffflo".getBytes());
+        m.headers().put("hello",10086);
+        m.headers().put("fuck",6666L);
+        System.out.println(Serialization(m));
+    }
 }

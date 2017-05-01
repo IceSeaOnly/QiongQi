@@ -28,10 +28,12 @@ public class DefaultPullConsumer implements PullConsumer {
     }
 
 
+    // TODO 重写 读取逻辑
     @Override public synchronized Message poll() {
         if (buckets.size() == 0 || queue == null) {
             return null;
         }
+
         //use Round Robin
         int checkNum = 0;
         while (++checkNum <= bucketList.size()) {
@@ -43,7 +45,18 @@ public class DefaultPullConsumer implements PullConsumer {
         }
         return null;
     }
-
+    // TODO 重写此处，绑定queue和topic
+    // 只能绑定一次且只能一个queue，并独占这个queue
+    @Override public synchronized void attachQueue(String queueName, Collection<String> topics) {
+        if (queue != null && !queue.equals(queueName)) {
+            throw new ClientOMSException("You have alreadly attached to a queue " + queue);
+        }
+        queue = queueName;
+        buckets.add(queueName);
+        buckets.addAll(topics);
+        bucketList.clear();
+        bucketList.addAll(buckets);
+    }
     @Override public Message poll(KeyValue properties) {
         throw new UnsupportedOperationException("Unsupported");
     }
@@ -55,17 +68,4 @@ public class DefaultPullConsumer implements PullConsumer {
     @Override public void ack(String messageId, KeyValue properties) {
         throw new UnsupportedOperationException("Unsupported");
     }
-
-    @Override public synchronized void attachQueue(String queueName, Collection<String> topics) {
-        if (queue != null && !queue.equals(queueName)) {
-            throw new ClientOMSException("You have alreadly attached to a queue " + queue);
-        }
-        queue = queueName;
-        buckets.add(queueName);
-        buckets.addAll(topics);
-        bucketList.clear();
-        bucketList.addAll(buckets);
-    }
-
-
 }
