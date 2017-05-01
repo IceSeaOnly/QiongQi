@@ -2,6 +2,7 @@ package io.openmessaging.demo;
 
 import io.openmessaging.KeyValue;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -9,8 +10,9 @@ import java.util.Set;
 /**
  * Created by Administrator on 2017/4/30.
  */
-public class ISKV implements KeyValue {
+public class ISKV implements KeyValue,Serializable{
 
+    private static final long serialVersionUID = 6445340064505295656L;
     private final Map<String, Object> kvs = new HashMap<>();
     @Override
     public KeyValue put(String key, int value) {

@@ -9,8 +9,9 @@ import java.io.Serializable;
 /**
  * Created by Administrator on 2017/4/30.
  */
-public class ISMessage implements BytesMessage {
+public class ISMessage implements BytesMessage,Serializable {
 
+    private static final long serialVersionUID = 5738134740239165577L;
     private KeyValue headers = new ISKV();
     private KeyValue properties;
     private byte[] body;

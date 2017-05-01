@@ -3,7 +3,7 @@ package io.openmessaging.demo;
 import io.openmessaging.Message;
 import org.junit.Test;
 
-import java.io.Serializable;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -67,18 +67,49 @@ public class MessageStore {
 
     }
 
+
     public String Serialization(Message m){
         ISMessage msg = (ISMessage) m;
         StringBuilder sb = new StringBuilder();
-        sb.append("body ").append(new String(msg.getBody()));
+        sb.append(new String(msg.getBody()));
+        msg.headers().keySet().forEach(
+                v->sb.append("\n ").append(v).append("\n ").append(msg.headers().getString(v)));
+        msg.properties().keySet().forEach(
+                v->sb.append("\n  ").append(v).append("\n  ").append(msg.properties().getString(v))
+        );
         return sb.toString();
     }
 
-    @Test
-    public void test(){
-        Message m = new ISMessage("helfffflo".getBytes());
-        m.headers().put("hello",10086);
-        m.headers().put("fuck",6666L);
-        System.out.println(Serialization(m));
+    /**
+     * 序列化存文件
+     * */
+    public void Write(ArrayList<Message> msgs,String fileName){
+        try {
+            FileOutputStream outStream = new FileOutputStream(fileName);
+            ObjectOutputStream objectOutputStream = new ObjectOutputStream(outStream);
+            objectOutputStream.writeObject(msgs);
+            outStream.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
+    /**
+     * 序列化读文件
+     * */
+    public ArrayList<Message> read(String fileName){
+        try {
+            FileInputStream freader = new FileInputStream(fileName);
+            ObjectInputStream objectInputStream = new ObjectInputStream(freader);
+            ArrayList<Message> msgs = (ArrayList<Message>) objectInputStream.readObject();
+            return msgs;
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
 }
