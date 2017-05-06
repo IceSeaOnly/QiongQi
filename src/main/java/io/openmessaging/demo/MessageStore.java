@@ -53,18 +53,29 @@ public class MessageStore {
         return message;
    }
 
+   public static final int QUEUE_SIZE = 10;
+   public static final int TOPIC_SIZE = 10;
+
    /**
     * 自定义存储逻辑
     * */
     public void putQueueMessage(String queue, Message message) {
-
+        int channel = fhash(queue,QUEUE_SIZE);
     }
+
 
     /**
      * 自定义存储逻辑
      * */
     public void putTopicMessage(String topic, Message message) {
+        int channel = fhash(topic,TOPIC_SIZE);
+    }
 
+    /**
+     * 自定义哈希
+     * */
+    public int fhash(String s,int c){
+        return (s.hashCode()%c+c)%c;
     }
 
 
@@ -80,6 +91,7 @@ public class MessageStore {
         return sb.toString();
     }
 
+
     /**
      * 序列化存文件
      * */
@@ -93,6 +105,8 @@ public class MessageStore {
             e.printStackTrace();
         }
     }
+
+
     /**
      * 序列化读文件
      * */
