@@ -11,14 +11,17 @@ import io.openmessaging.Promise;
 
 public class DefaultProducer  implements Producer,MessageFactory {
 
-    private MessageStore messageStore = MessageStore.getInstance();
+    private MessageStore messageStore = null;
 
     private KeyValue properties; //这里包含文件存放路径
     private String FILEPATH = null;
+
     public DefaultProducer(KeyValue properties) {
         this.properties = properties;
         FILEPATH = properties.getString("STORE_PATH");
-        MessageStore.setPath(FILEPATH);
+        if(!FILEPATH.endsWith("/"))
+            FILEPATH += "/";
+        messageStore = new MessageStore();
     }
 
     @Override public BytesMessage createBytesMessageToTopic(String topic, byte[] body) {
@@ -40,11 +43,11 @@ public class DefaultProducer  implements Producer,MessageFactory {
             throw new ClientOMSException(String.format("Queue:%s Topic:%s should put one and only one", true, queue));
         }
         //TODO 重写存储逻辑，高效存储
-        messageStore.putMessage(topic != null ? topic : queue, message);
+
         if(topic == null)
-            messageStore.putQueueMessage(queue, message);
+            messageStore.putQueueMessage(FILEPATH,queue, message);
         else
-            messageStore.putTopicMessage(topic, message);
+            messageStore.putTopicMessage(FILEPATH,topic, message);
     }
 
 

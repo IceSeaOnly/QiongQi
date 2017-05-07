@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Set;
 
 public class DefaultPullConsumer implements PullConsumer {
-    private MessageStore messageStore = MessageStore.getInstance();
+    private MessageStore messageStore = null;
     private KeyValue properties;
     private String queue;
     private Set<String> buckets = new HashSet<>();
@@ -38,10 +38,10 @@ public class DefaultPullConsumer implements PullConsumer {
         int checkNum = 0;
         while (++checkNum <= bucketList.size()) {
             String bucket = bucketList.get((++lastIndex) % (bucketList.size()));
-            Message message = messageStore.pullMessage(queue, bucket);
-            if (message != null) {
-                return message;
-            }
+//            Message message = messageStore.pullMessage(queue, bucket);
+//            if (message != null) {
+//                return message;
+//            }
         }
         return null;
     }

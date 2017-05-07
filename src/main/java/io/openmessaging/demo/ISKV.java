@@ -55,7 +55,7 @@ public class ISKV implements KeyValue,Serializable{
 
     @Override
     public String getString(String key) {
-        return String.valueOf(kvs.getOrDefault(key, null));
+        return (String)kvs.getOrDefault(key, null);
     }
 
     @Override
