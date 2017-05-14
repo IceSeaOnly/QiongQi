@@ -4,23 +4,37 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.concurrent.LinkedBlockingDeque;
 
 /**
  * Created by Administrator on 2017/5/7.
  */
 public class FileSaveThread extends Thread {
-    private ArrayList<DataPackage> dataPackages;
+    private LinkedBlockingDeque<ArrayList<DataPackage>> dataPackages;
     private String fileName;
+    private int counter;
 
-    public FileSaveThread(ArrayList<DataPackage> dataPackages, String fileName) {
+
+    public FileSaveThread(LinkedBlockingDeque<ArrayList<DataPackage>> dataPackages) {
         this.dataPackages = dataPackages;
+        this.counter = 0;
+    }
+
+    public void setFileName(String fileName) {
         this.fileName = fileName;
     }
 
     @Override
     public void run() {
         super.run();
-        Write(dataPackages,fileName);
+        while (true){
+            try {
+                Write(dataPackages.take(),fileName+(counter++));
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     /**
@@ -32,6 +46,7 @@ public class FileSaveThread extends Thread {
             FileOutputStream outStream = new FileOutputStream(fileName);
             ObjectOutputStream objectOutputStream = new ObjectOutputStream(outStream);
             objectOutputStream.writeObject(msgs);
+            outStream.flush();
             outStream.close();
         } catch (IOException e) {
             e.printStackTrace();

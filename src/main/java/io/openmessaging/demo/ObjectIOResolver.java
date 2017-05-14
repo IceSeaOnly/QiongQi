@@ -4,6 +4,7 @@ import io.openmessaging.Message;
 
 import java.io.*;
 import java.util.ArrayList;
+import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -14,21 +15,27 @@ import java.util.concurrent.locks.ReentrantLock;
  */
 public class ObjectIOResolver {
     private ArrayList<DataPackage> dataPackages;
+    private LinkedBlockingDeque<ArrayList<DataPackage>> dataQueue;
     private int index; //文件计数器
     private Lock lock = new ReentrantLock();
-    private int MAXSIZE = 200;
+    private int MAXSIZE = 2000;
+    private FileSaveThread fileSaveThread;
 
     public ObjectIOResolver() {
         dataPackages = new ArrayList<>();
+        dataQueue = new LinkedBlockingDeque<>();
+        fileSaveThread = new FileSaveThread(dataQueue);
+        fileSaveThread.start();
         index = 0;
     }
 
-    public void push(String filePath,DataPackage msg){
+    public void push(String fp,DataPackage msg){
         dataPackages.add(msg);
         if(dataPackages.size() > MAXSIZE){
             lock.lock();
             if(dataPackages.size() > MAXSIZE){
-                new FileSaveThread(dataPackages,filePath+"-"+(index++)).start();
+                dataQueue.add(dataPackages);
+                fileSaveThread.setFileName(fp);
                 dataPackages = new ArrayList<>();
             }
             lock.unlock();

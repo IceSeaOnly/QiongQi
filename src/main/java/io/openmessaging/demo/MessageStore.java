@@ -4,8 +4,8 @@ import io.openmessaging.Message;
 
 public class MessageStore {
 
-    private static final int QUEUE_SIZE = 10;
-    private static final int TOPIC_SIZE = 10;
+    private static final int QUEUE_SIZE = 5;
+    private static final int TOPIC_SIZE = 5;
 
     private static ObjectIOResolver[] Qresolvers = null;
     private static ObjectIOResolver[] Tresolvers = null;
