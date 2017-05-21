@@ -1,5 +1,8 @@
 package io.openmessaging.demo;
 
+import io.openmessaging.Message;
+
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
@@ -11,18 +14,14 @@ import java.util.concurrent.LinkedBlockingDeque;
  * Created by Administrator on 2017/5/7.
  */
 public class FileSaveThread extends Thread {
-    private LinkedBlockingDeque<ArrayList<DataPackage>> dataPackages;
+    private LinkedBlockingDeque<DataPackage> dataPackages;
     private String fileName;
     private int counter;
 
 
-    public FileSaveThread(LinkedBlockingDeque<ArrayList<DataPackage>> dataPackages) {
+    public FileSaveThread(LinkedBlockingDeque<DataPackage> dataPackages) {
         this.dataPackages = dataPackages;
         this.counter = 0;
-    }
-
-    public void setFileName(String fileName) {
-        this.fileName = fileName;
     }
 
     @Override
@@ -30,7 +29,9 @@ public class FileSaveThread extends Thread {
         super.run();
         while (true){
             try {
-                Write(dataPackages.take(),fileName+(counter++));
+                DataPackage dp = dataPackages.take();
+                System.out.println(dp.getName()+"->"+dp.getMsgs().size());
+                Write(dp,dp.getPath(),dp.getName());
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -40,17 +41,17 @@ public class FileSaveThread extends Thread {
     /**
      * 序列化存文件
      * */
-    public void Write(ArrayList<DataPackage> msgs, String fileName){
-        System.out.println("BEGIN:"+fileName);
+    public void Write(DataPackage dp,String path,String fileName){
         try {
-            FileOutputStream outStream = new FileOutputStream(fileName);
+            File f = new File(path);
+            if(!f.exists()) f.mkdirs();
+            FileOutputStream outStream = new FileOutputStream(path+fileName);
             ObjectOutputStream objectOutputStream = new ObjectOutputStream(outStream);
-            objectOutputStream.writeObject(msgs);
+            objectOutputStream.writeObject(dp);
             outStream.flush();
             outStream.close();
         } catch (IOException e) {
             e.printStackTrace();
         }
-        System.out.println("END:"+fileName);
     }
 }
