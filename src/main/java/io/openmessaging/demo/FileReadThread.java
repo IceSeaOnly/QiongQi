@@ -25,13 +25,14 @@ public class FileReadThread extends Thread {
     @Override
     public void run() {
         super.run();
+        System.out.println("ReadThread with "+filePaths.size()+" tasks running...");
         for (int i = 0; i < filePaths.size(); i++) {
             try {
                 FileInputStream fileInputStream = new FileInputStream(filePaths.get(i));
                 ObjectInputStream objectInputStream = new ObjectInputStream(fileInputStream);
                 DataPackage dt = (DataPackage) objectInputStream.readObject();
                 dataPackages.add(dt);
-                System.out.println(filePaths.get(i)+" Success.");
+                //System.out.println(filePaths.get(i)+" Success.");
             } catch (FileNotFoundException e) {
                 System.out.println(filePaths.get(i)+" Failed.");
                 e.printStackTrace();
@@ -43,5 +44,6 @@ public class FileReadThread extends Thread {
                 e.printStackTrace();
             }
         }
+        System.out.println("ReadThread with "+filePaths.size()+" tasks stop");
     }
 }

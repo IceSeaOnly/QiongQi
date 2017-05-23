@@ -1,12 +1,8 @@
 package io.openmessaging.demo;
 
-import io.openmessaging.Message;
-
 import java.io.File;
 import java.util.*;
 import java.util.concurrent.LinkedBlockingDeque;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * Created by IceSea on 2017/5/21.
@@ -32,20 +28,33 @@ public class TopicCenter extends Thread{
     }
 
     private static HashMap<String,ArrayList<DataPackage>> topicMessages;
+    private static HashMap<String,Integer> topicIndexs;
+
+    public DataPackage getDataPackage(String topicName,int index){
+        if(topicMessages.containsKey(topicName)){
+            if(topicMessages.get(topicName).size() > index)
+                return topicMessages.get(topicName).get(index);
+            else if(topicIndexs.get(topicName) <= index)
+                return new DataPackage(-1,"","",null);
+        }
+        return null;
+    }
 
     @Override
     public void run() {
         super.run();
         topicMessages = new HashMap<>();
+        topicIndexs = new HashMap<>();
         try {
             String path = pathTrans.take();
             ReadFile(path);
             while (true){
                 DataPackage dt = dataPackages.take();
-                if(!topicMessages.containsKey(dt.getName())){
-                    topicMessages.put(dt.getName(),new ArrayList<>());
+                String dname = dt.getName().split("-")[0];
+                if(!topicMessages.containsKey(dname)){
+                    topicMessages.put(dname,new ArrayList<>());
                 }
-                topicMessages.get(dt.getName()).add(dt);
+                topicMessages.get(dname).add(dt);
             }
         } catch (InterruptedException e) {
             e.printStackTrace();
@@ -58,12 +67,15 @@ public class TopicCenter extends Thread{
         ArrayList<String> readList = new ArrayList<>();
         for (int i = 0; i < ts.size(); i++) {
             if(ts.get(i).contains("-0")){
-                String name = ts.get(i);
+                String name = ts.get(i).substring(0,ts.get(i).length()-2);
                 int sum = 0;
                 for (int j = 0; j < ts.size(); j++) {
-                    if(ts.get(i).startsWith(name+"-"))
-                        readList.add(name+(sum++));
+                    if(ts.get(j).startsWith(name+"-")){
+                        String fname = path+"t/"+name+"-"+(sum++);
+                        readList.add(fname);
+                    }
                 }
+                topicIndexs.put(name,sum);
             }
         }
         Collections.sort(readList,new NameSorter());

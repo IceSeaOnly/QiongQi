@@ -15,7 +15,6 @@ import java.util.concurrent.LinkedBlockingDeque;
  */
 public class FileSaveThread extends Thread {
     private LinkedBlockingDeque<DataPackage> dataPackages;
-    private String fileName;
     private int counter;
 
 
@@ -30,7 +29,7 @@ public class FileSaveThread extends Thread {
         while (true){
             try {
                 DataPackage dp = dataPackages.take();
-                System.out.println(dp.getName()+"->"+dp.getMsgs().size());
+                //System.out.println(dp.getName()+"->"+dp.getMsgs().size());
                 Write(dp,dp.getPath(),dp.getName());
             } catch (InterruptedException e) {
                 e.printStackTrace();
